@@ -1,8 +1,9 @@
+
 "use client"
 import React, { useState, useEffect } from "react";
 import ProfileSection from "./ProfileSection";
 import SavedAdsSection from "./SavedAdsSection";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
         // Lucide React Icons (simplified SVG components)
         const User = () => (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,35 +72,32 @@ import { useRouter } from "next/navigation";
             </svg>
         );
 
-        export default function SettingsPage() {
-            const [activeMenu, setActiveMenu] = useState('Profile');
-            const [activeTab, setActiveTab] = useState('Personal Details');
-            const [sidebarOpen, setSidebarOpen] = useState(false);
-            const [showAddStore, setShowAddStore] = useState(false);
-            const [showAddDelivery, setShowAddDelivery] = useState(false);
-            const [showAddPhone, setShowAddPhone] = useState(false);
-            const [showOtpVerify, setShowOtpVerify] = useState(false);
-            const [showDeleteModal, setShowDeleteModal] = useState(false);
-            const [chargeFee, setChargeFee] = useState(false);
-            const [selectedDays, setSelectedDays] = useState([]);
-            const router = useRouter();
-            const page = "profile" 
-            useEffect(() => {
-                const handleUrlChange = () => {
-                const params = new URLSearchParams(window.location.search);
-                const page = params.get("page") || "profile";
-                setActiveMenu(page);
-                };
+    export default function SettingsPage() {
+    const [activeMenu, setActiveMenu] = useState("profile"); // default to 'profile'
+    const [activeTab, setActiveTab] = useState("Personal Details");
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [showAddStore, setShowAddStore] = useState(false);
+    const [showAddDelivery, setShowAddDelivery] = useState(false);
+    const [showAddPhone, setShowAddPhone] = useState(false);
+    const [showOtpVerify, setShowOtpVerify] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [chargeFee, setChargeFee] = useState(false);
+    const [selectedDays, setSelectedDays] = useState([]);
+    const [activePage, setActivePage] = useState("profile");
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
-                // Initial sync
-                handleUrlChange();
+    useEffect(() => {
+        const page = searchParams.get("page") || "profile";
+        setActivePage(page);
 
-                // Listen to browser back/forward
-                window.addEventListener("popstate", handleUrlChange);
+        if (!searchParams.get("page")) {
+        router.replace("/user/settings?page=profile");
+        }
+    }, [searchParams, router]);
 
-                return () => window.removeEventListener("popstate", handleUrlChange);
-            }, []);
-                    
+
+          
 
           const menuItems = [
                 { name: "Profile", slug: "profile", icon: User },
@@ -109,14 +107,7 @@ import { useRouter } from "next/navigation";
                 { name: "Delete Account", slug: "delete-account", icon: Trash2 },
                 { name: "Logout", slug: "logout", icon: LogOut },
             ];
-            
-
-
-                const handleMenuClick = (slug) => {
-                setActiveMenu(slug);
-                router.replace(`/user/settings?page=${slug}`);
-            };
-
+          
             const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
             const sampleAdverts = [
@@ -358,12 +349,12 @@ import { useRouter } from "next/navigation";
                             {/* Main Content */}
                            <main className="flex-1">
                             <div className="flex-1 p-4">
-                                {activeMenu === "profile" && <ProfileSection />}
-                                {activeMenu === "saved-ads" && <SavedAdsSection />}
-                                {activeMenu === "my-shop" && renderMyShop()}
-                                {activeMenu === "my-messages" && renderMyMessages()}
-                                {activeMenu === "delete-account" && renderDeleteAccount()}
-                                {activeMenu === "logout" && (
+                                {activePage === "profile" && <ProfileSection />}
+                                {activePage === "saved-ads" && <SavedAdsSection />}
+                                {activePage === "my-shop" && renderMyShop()}
+                                {activePage === "my-messages" && renderMyMessages()}
+                                {activePage === "delete-account" && renderDeleteAccount()}
+                                {activePage === "logout" && (
                                 <div className="space-y-4">
                                     <h2 className="text-2xl font-bold">Logout</h2>
                                     <div className="bg-gray-50 rounded-lg p-6 text-center">
@@ -377,7 +368,7 @@ import { useRouter } from "next/navigation";
                                     </div>
                                 </div>
                                 )}
-                                {!["profile","saved-ads","my-shop","my-messages","delete-account","logout"].includes(activeMenu) && (
+                                {!["profile","saved-ads","my-shop","my-messages","delete-account","logout"].includes(activePage) && (
                                 <div className="text-center text-gray-500 py-10">
                                     Please select a section from the menu to view its content.
                                 </div>

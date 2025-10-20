@@ -1,6 +1,8 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "../context/AuthProvider";
+import Link from "next/link";
 import {
   Heart,
   MessageSquare,
@@ -13,24 +15,40 @@ import {
   BarChart3,
   Star,
   Store,
+   X,
 } from "lucide-react";
 
 export default function Header() {
   const { user: authUser, logout, openModal } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // Mock user for now (set to false to test logged-out state)
   const mockUser = true;
+  const router = useRouter();
   const user = mockUser ? { name: "Ahmed" } : authUser;
     console.log("the user is", mockUser, user, authUser)
+    function MenuItem({ icon, text, onClick, className = "", as: Component = "button", href }) {
+  return (
+    <Component
+      href={href}
+      onClick={onClick}
+      className={`flex items-center gap-2 px-4 py-2 text-sm w-full text-left hover:bg-gray-100 transition ${className}`}
+    >
+      {icon}
+      <span>{text}</span>
+    </Component>
+  );
+}
+
   return (
     <header className="sticky top-0 z-50 bg-[var(--delala-green)] shadow-sm text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Left side */}
         <div className="flex items-center gap-4">
-          <button
+           <button
             className="md:hidden p-2 rounded hover:bg-green-700/40"
             aria-label="Open menu"
+            onClick={() => setMobileMenuOpen(true)}
           >
             <svg
               className="w-5 h-5 text-white"
@@ -46,8 +64,52 @@ export default function Header() {
               />
             </svg>
           </button>
-          <span className="font-bold text-lg text-white">Delala</span>
+          <Link href="/" className="font-bold text-lg text-white">
+            <span className="font-bold text-lg text-white">Delala</span>
+          </Link>
+          
         </div>
+         {/* Mobile side menu */}
+      {mobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setMobileMenuOpen(false)}
+          ></div>
+
+          {/* Side drawer */}
+          <div className="fixed top-0 left-0 w-64 h-full bg-white text-gray-800 z-50 shadow-lg flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b">
+              <span className="font-semibold text-lg">Menu</span>
+              <button onClick={() => setMobileMenuOpen(false)}>
+                <X size={24} />
+              </button>
+            </div>
+            <div className="flex flex-col p-4 gap-2">
+              <Link
+                href="/user/settings?page=saved-ads"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <MenuItem icon={<Heart size={16} />} text="Saved" />
+              </Link>
+              <Link
+                href="/user/settings?page=my-messages"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <MenuItem icon={<MessageSquare size={16} />} text="Messages" />
+              </Link>
+              <Link
+                href="/user/settings?page=my-shop"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <MenuItem icon={<ShoppingBag size={16} />} text="My Shop" />
+              </Link>
+              <MenuItem icon={<Bell size={16} />} text="Notifications" />
+            </div>
+          </div>
+        </>
+      )}
 
         {/* Right side */}
         <div className="flex items-center gap-3 relative">
@@ -55,10 +117,18 @@ export default function Header() {
             <>
               {/* Quick icon buttons */}
               <div className="hidden sm:flex items-center gap-2">
-                <IconButton icon={<Heart size={18} />} title="Saved" />
-                <IconButton icon={<MessageSquare size={18} />} title="Messages" />
+                <Link href="/user/settings?page=saved-ads">
+                  <IconButton icon={<Heart size={18} />} title="Saved" />
+                </Link>
+                <Link href="/user/settings?page=my-meessages">
+                  <IconButton icon={<MessageSquare size={18} />} title="Messages" />
+                </Link>
+                <Link href="/user/settings?page=my-shop">
+                  <IconButton icon={<ShoppingBag size={18} />} title="My Shop" />
+                </Link>
+                
                 <IconButton icon={<Bell size={18} />} title="Notifications" />
-                <IconButton icon={<ShoppingBag size={18} />} title="My Adverts" />
+                
               </div>
 
               {/* User dropdown */}
@@ -75,16 +145,32 @@ export default function Header() {
 
                 {menuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg overflow-hidden">
-                    <MenuItem icon={<Store size={16} />} text="My Shop" />
-                    <MenuItem icon={<BarChart3 size={16} />} text="Performance" />
-                    <MenuItem icon={<Settings size={16} />} text="Settings" />
-                    <MenuItem icon={<Star size={16} />} text="Feedback" />
                     <MenuItem
+                      icon={<Store size={16} />}
+                      text="My Shop"
+                      as={Link}
+                      href="/user/settings?page=my-shop"
+                    />
+                    <MenuItem
+                      icon={<Settings size={16} />}
+                      text="Settings"
+                      as={Link}
+                      href="/user/settings?page=profile"
+                    />
+                     <MenuItem
+                      icon={<Star size={16} />}
+                      text="Feedback"
+                      as={Link}
+                      href="/feedback/11"
+                    />
+                     <MenuItem
                       icon={<LogOut size={16} />}
                       text="Logout"
-                      onClick={logout}
-                      className="border-t"
+                      as={Link}
+                      href="/user/settings?page=logout"
                     />
+                  
+                 
                   </div>
                 )}
               </div>
@@ -109,13 +195,13 @@ export default function Header() {
 
           {/* SELL button */}
           <button
-            onClick={() =>
-              user ? console.log("go to sell page") : openModal("login")
-            }
-            className="bg-white text-[var(--delala-green)] rounded-md px-4 py-2 text-sm font-semibold hover:bg-gray-100 transition"
-          >
-            SELL
-          </button>
+          onClick={() =>
+            router.push("/user/create-ad")
+          }
+          className="bg-white text-[var(--delala-green)] rounded-md px-4 py-2 text-sm font-semibold hover:bg-gray-100 transition"
+        >
+          SELL
+        </button>
         </div>
       </div>
     </header>
