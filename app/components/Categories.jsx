@@ -50,7 +50,7 @@ export default function Categories({ categories = [] }) {
     setActiveCategory(null);
     setPanelPos(null);
   };
-
+console.log("categories we have ", categories)
   return (
     <>
       <style jsx>{`
@@ -89,7 +89,7 @@ export default function Categories({ categories = [] }) {
       <aside
         ref={sidebarRef}
         id="sidebar"
-        className="relative w-full md:w-80 shrink-0 bg-white rounded-2xl sidebar-shadow"
+        className="hidden sm:block relative w-full md:w-80 shrink-0 bg-white rounded-2xl sidebar-shadow"
         style={{ overflow: "visible" }}
       >
         <div className="sticky top-16 h-full max-h-[calc(100vh-4rem)]" style={{ overflow: "visible" }}>

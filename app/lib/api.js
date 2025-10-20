@@ -7,7 +7,7 @@ const BASE_URL =
 export async function fetchAPI(path, { cache = "force-cache" } = {}) {
   try {
     const res = await fetch(`${BASE_URL}${path}`, { cache });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) {console.log("path ", path, "failed"); throw new Error(`HTTP ${res.status}`);}
     return res.json();
   } catch (err) {
     console.warn(`⚠️ API fetch failed for ${path}:`, err.message);

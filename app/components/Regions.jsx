@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useState, useEffect, useRef } from "react";
 import { api } from "../lib/api";
@@ -171,11 +172,12 @@ useEffect(() => {
         </div>
 
         {/* Categories */}
-        <div className="max-w-4xl mx-auto mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-gray-800">
-          {categories.map(({ icon, label, slug }) => (
-            <div key={label} className="bg-white rounded-lg p-3 text-center shadow-sm">
-              <div className="text-3xl mb-2">{icon}</div>
-              <div className="text-sm font-medium">{label}</div>
+        <div className="block sm:hidden max-w-4xl mx-auto mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 text-gray-800">
+          {categories.map((cat, i) => (
+            <div key={i} className="bg-white rounded-lg p-3 text-center shadow-sm">
+              <Link href={'/'+cat.slug} onClick={() => setMobileMenuOpen(false)}>
+                <div className="text-3xl mb-2 fontes">{cat.categoryName}</div>
+              </Link>
             </div>
           ))}
         </div>
@@ -183,8 +185,8 @@ useEffect(() => {
 
       {/* Regions modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white text-gray-800 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6 relative">
+        <div className=" fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 block md:hidden">
+          <div className="bg-white text-gray-800 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6 relative mlimit">
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-3 right-4 text-gray-600 text-xl font-bold"

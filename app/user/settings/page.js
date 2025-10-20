@@ -1,8 +1,9 @@
 
 "use client"
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ProfileSection from "./ProfileSection";
 import SavedAdsSection from "./SavedAdsSection";
+import { useRouter, useSearchParams } from "next/navigation";
         // Lucide React Icons (simplified SVG components)
         const User = () => (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,18 +83,31 @@ import SavedAdsSection from "./SavedAdsSection";
             const [showDeleteModal, setShowDeleteModal] = useState(false);
             const [chargeFee, setChargeFee] = useState(false);
             const [selectedDays, setSelectedDays] = useState([]);
+            const router = useRouter();
+  const searchParams = useSearchParams();
+  const pageParam = searchParams.get("page") || "profile";
+
           
 
-            const menuItems = [
-                { name: 'Profile', icon: User },
-                { name: 'Saved Ads', icon: User },
-                { name: 'My Shop', icon: Store },
-                { name: 'My Messages', icon: MessageSquare },
-                { name: 'Delete Account', icon: Trash2 },
-                { name: 'Logout', icon: LogOut }
-            ];
+          const menuItems = [
+    { name: "Profile", slug: "profile", icon: User },
+    { name: "Saved Ads", slug: "saved-ads", icon: User },
+    { name: "My Shop", slug: "my-shop", icon: Store },
+    { name: "My Messages", slug: "my-messages", icon: MessageSquare },
+    { name: "Delete Account", slug: "delete-account", icon: Trash2 },
+    { name: "Logout", slug: "logout", icon: LogOut },
+  ];
+useEffect(() => {
+    const page = searchParams.get("page");
+    if (page && menuItems.some(item => item.slug === page)) {
+      setActiveMenu(page);
+    }
+  }, [searchParams]);
 
-
+    const handleMenuClick = (slug) => {
+    setActiveMenu(slug);
+    router.replace(`/user/settings?page=${slug}`);
+  };
 
             const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -295,37 +309,7 @@ import SavedAdsSection from "./SavedAdsSection";
                 </div>
             );
 
-            const renderContent = () => {
-                switch (activeMenu) {
-                    case 'Profile':
-                        return <ProfileSection />;
-                    case 'Saved Ads':
-                        return <SavedAdsSection />;
-                    case 'My Shop':
-                        return renderMyShop();
-                    case 'My Messages':
-                        return renderMyMessages();
-                    case 'Delete Account':
-                        return renderDeleteAccount();
-                    case 'Logout':
-                        return (
-                            <div className="space-y-4">
-                                <h2 className="text-2xl font-bold">Logout</h2>
-                                <div className="bg-gray-50 rounded-lg p-6 text-center">
-                                    <p className="mb-4">Are you sure you want to logout?</p>
-                                    <button 
-                                        onClick={() => alert('Logged out successfully!')}
-                                        className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-6 py-2"
-                                    >
-                                        Confirm Logout
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    default:
-                        return null;
-                }
-            };
+        
 
             return (
                 <div className="min-h-screen bg-gray-100">
@@ -347,21 +331,13 @@ import SavedAdsSection from "./SavedAdsSection";
                                     {menuItems.map(item => {
                                         const IconComponent = item.icon;
                                         return (
-                                            <button
-                                                key={item.name}
-                                                onClick={() => {
-                                                    setActiveMenu(item.name);
-                                                    setSidebarOpen(false);
-                                                    if (item.name === 'Profile') {
-                                                        setActiveTab('Personal Details');
-                                                    }
-                                                }}
-                                                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors ${
-                                                    activeMenu === item.name
-                                                        ? 'bg-gray-100 text-green-600'
-                                                        : 'text-gray-700 hover:bg-gray-50'
-                                                }`}
-                                            >
+                                      <button
+                                        key={item.slug}
+                                        onClick={() => handleMenuClick(item.slug)}
+                                        className={`w-full text-left px-3 py-2 rounded ${
+                                        activeMenu === item.slug ? "bg-gray-200" : "hover:bg-gray-100"
+                                        }`}
+                                    >
                                                 <IconComponent />
                                                 <span>{item.name}</span>
                                             </button>
@@ -372,9 +348,28 @@ import SavedAdsSection from "./SavedAdsSection";
 
                             {/* Main Content */}
                             <main className="flex-1">
-                                <div className="bg-white rounded-lg shadow-sm p-6">
-                                    {renderContent()}
+                                <div className="flex-1 p-4">
+                            {activeMenu === "profile" && <ProfileSection />}
+                            {activeMenu === "saved-ads" && <SavedAdsSection />}
+                            {activeMenu === "my-shop" && renderMyShop()}
+                            {activeMenu === "my-messages" && renderMyMessages()}
+                            {activeMenu === "delete-account" && renderDeleteAccount()}
+                            {activeMenu === "logout" && (
+                                <div className="space-y-4">
+                                <h2 className="text-2xl font-bold">Logout</h2>
+                                <div className="bg-gray-50 rounded-lg p-6 text-center">
+                                    <p className="mb-4">Are you sure you want to logout?</p>
+                                    <button
+                                    onClick={() => alert('Logged out successfully!')}
+                                    className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-6 py-2"
+                                    >
+                                    Confirm Logout
+                                    </button>
                                 </div>
+                                </div>
+                            )}
+                            </div>
+
                             </main>
                         </div>
                     </div>
