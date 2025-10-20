@@ -1,0 +1,20 @@
+/* Override Tailwind emerald colors */
+.bg-emerald-600 {
+  --tw-bg-opacity: 1 !important;
+  background-color: #1fbc53 !important;
+}
+
+.hover\:bg-emerald-700:hover {
+  --tw-bg-opacity: 1 !important;
+  background-color: #1ca84b !important;
+}
+
+.text-emerald-600 {
+  --tw-text-opacity: 1 !important;
+  color: #1fbc53 !important;
+}
+
+.border-emerald-600 {
+  --tw-border-opacity: 1 !important;
+  border-color: #1fbc53 !important;
+}
