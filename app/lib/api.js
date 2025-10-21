@@ -36,7 +36,10 @@ export const api = {
   // 🗂️ Categories with subcategories and counts
   getCategories: () => fetchAPI("/categories/with-count"),
   getCategoriesAll: () => fetchAPI("/categories/all"),
-  getAdsAll: () => fetchAPI("/ads/all"),
+  getAdsAll: (from = 0, to = 20) => fetchAPI(`/ads/random?from=${from}&to=${to}`, { cache: "no-store" }),
+  // getAdsAll: () => fetchAPI("/ads/all"),
+  getUser: (id) => fetchAPI(`/user/${id}`, { cache: "no-store" }),
+  getUserAds: (id) => fetchAPI(`/user/${id}/ads`, { cache: "no-store" }),
 
   // 📦 Ads by category
   getCategoryAds: (slug) => fetchAPI(`/ads/category/${slug}`, { cache: "no-store" }),

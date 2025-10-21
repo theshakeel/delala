@@ -50,7 +50,6 @@ export default function Categories({ categories = [] }) {
     setActiveCategory(null);
     setPanelPos(null);
   };
-console.log("categories we have ", categories)
   return (
     <>
       <style jsx>{`
@@ -110,7 +109,7 @@ console.log("categories we have ", categories)
                   <div
                     onMouseEnter={(e) => onCategoryEnter(i, e)}
                     // onMouseLeave={onCategoryLeave}
-                    className="flex items-center justify-between p-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 cursor-pointer rounded-xl mx-2 my-1"
+                    className="flex items-center justify-between hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 cursor-pointer rounded-xl mx-2 my-1"
                   >
                     <Link
                       href={cat.slug}
@@ -177,7 +176,7 @@ console.log("categories we have ", categories)
               <li key={sub.name}>
                 <Link
                   href={sub.slug}
-                  className="subcategory-link flex justify-between items-center p-3 mx-2 rounded-lg transition-all"
+                  className="subcategory-link flex justify-between items-center p-1 mx-2 rounded-lg transition-all"
                 >
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>

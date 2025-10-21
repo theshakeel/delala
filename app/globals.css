@@ -57,4 +57,9 @@
   color: #16a34a;
 }
 .fontes{font-size:12px;}
-.mlimit{max-width: 85% !important;}
+@media (max-width: 767px) {
+  .mlimit {
+    max-width: 85% !important;
+    margin-left: -36px !important;
+  }
+}

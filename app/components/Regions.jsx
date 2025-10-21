@@ -18,7 +18,7 @@ useEffect(() => {
     setSuggestions([]);
     return;
   }
-
+console.log("we got regions", regions )
   const timeout = setTimeout(async () => {
     setLoading(true);
     try {
@@ -185,7 +185,7 @@ useEffect(() => {
 
       {/* Regions modal */}
       {isOpen && (
-        <div className=" fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 block md:hidden">
+        <div className=" fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50 block">
           <div className="bg-white text-gray-800 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-y-auto p-6 relative mlimit">
             <button
               onClick={() => setIsOpen(false)}

@@ -13,7 +13,7 @@ export default function Footer() {
             <h4 className="font-semibold mb-3">About us</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/about" className="hover:underline">About Delala</Link>
+                <Link href="/about-us" className="hover:underline">About Delala</Link>
               </li>
               <li>
                 <Link href="/terms" className="hover:underline">Terms &amp; Conditions</Link>

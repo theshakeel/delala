@@ -1,4 +1,5 @@
 "use client"
+import { loadHomeData } from "../../lib/dataProvider";
 import React, { useState, useEffect } from "react";
         // Mock data for types.json
         const mockTypes = {
@@ -66,7 +67,9 @@ import React, { useState, useEffect } from "react";
             const [regions, setRegions] = useState([]);
             const [mainCategory, setMainCategory] = useState('');
             const [subCategory, setSubCategory] = useState('');
+            const [attributes, setAttributes] = useState([]);
             const [selectedRegion, setSelectedRegion] = useState('');
+            const [selectedZone, setSelectedZone] = useState('');
             const [videoUrl, setVideoUrl] = useState('');
             const [title, setTitle] = useState('');
             const [formData, setFormData] = useState({});
@@ -102,49 +105,31 @@ import React, { useState, useEffect } from "react";
             });
             const [loading, setLoading] = useState(true);
             const [multiSelectStates, setMultiSelectStates] = useState({});
+            // const { regions, categories } = await loadHomeData();
+            
 
             // Mock API calls
             useEffect(() => {
-                const fetchData = async () => {
-                    try {
-                        // Mock categories data
-                        const mockCategories = [
-                            { id: 1, name: "Electronics", slug: "electronics", parent_slug: null, is_category: true, attributes: [] },
-                            { id: 2, name: "Smartphones", slug: "smartphones", parent_slug: "electronics", is_category: false, attributes: ["brand", "model", "condition", "color"] },
-                            { id: 3, name: "Laptops", slug: "laptops", parent_slug: "electronics", is_category: false, attributes: ["brand", "model", "year", "condition"] },
-                            { id: 4, name: "Vehicles", slug: "vehicles", parent_slug: null, is_category: true, attributes: [] },
-                            { id: 5, name: "Cars", slug: "cars", parent_slug: "vehicles", is_category: false, attributes: ["brand", "model", "year", "fuel_type", "transmission", "mileage"] },
-                            { id: 6, name: "Fashion", slug: "fashion", parent_slug: null, is_category: true, attributes: [] },
-                            { id: 7, name: "Clothing", slug: "clothing", parent_slug: "fashion", is_category: false, attributes: ["size", "color", "material", "condition"] },
-                            { id: 8, name: "Real Estate", slug: "real-estate", parent_slug: null, is_category: true, attributes: [] },
-                            { id: 9, name: "Apartments", slug: "apartments", parent_slug: "real-estate", is_category: false, attributes: ["bedrooms", "bathrooms", "area"] }
-                        ];
+            const fetchData = async () => {
+                try {
+                const { regions, categories } = await loadHomeData();
 
-                        // Mock regions data
-                        const mockRegions = [
-                            { id: 1, name: "New York", slug: "new-york" },
-                            { id: 2, name: "Los Angeles", slug: "los-angeles" },
-                            { id: 3, name: "Chicago", slug: "chicago" },
-                            { id: 4, name: "Houston", slug: "houston" },
-                            { id: 5, name: "Phoenix", slug: "phoenix" }
-                        ];
+                setRegions(regions || []);
+                setCategories(categories || []);
+                setLoading(false);
+                } catch (error) {
+                console.error("❌ Failed to fetch regions/categories:", error);
+                setLoading(false);
+                }
+            };
 
-                        setCategories(mockCategories);
-                        setRegions(mockRegions);
-                        setLoading(false);
-                    } catch (error) {
-                        console.error('Failed to fetch data:', error);
-                        setLoading(false);
-                    }
-                };
-
-                fetchData();
+            fetchData();
             }, []);
 
             const mainCategories = categories.filter(cat => cat.is_category);
             const subCategories = categories.filter(cat => !cat.is_category && cat.parent_slug === mainCategory);
             const selectedSubCategory = categories.find(cat => cat.slug === subCategory);
-            const attributes = selectedSubCategory?.attributes || [];
+            // console.log("categories we have ",categories, subCategory)
 
             const handleMainCategoryChange = (slug) => {
                 setMainCategory(slug);
@@ -153,8 +138,10 @@ import React, { useState, useEffect } from "react";
                 setMultiSelectStates({});
             };
 
-            const handleSubCategoryChange = (slug) => {
-                setSubCategory(slug);
+            const handleSubCategoryChange = (sub) => {
+                // console.log("the sub is", sub.slug,sub.attr)
+                setSubCategory(sub.slug);
+                setAttributes(sub.attr);
                 setFormData({});
                 setMultiSelectStates({});
             };
@@ -361,50 +348,62 @@ import React, { useState, useEffect } from "react";
                                     <h2 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">
                                         1. Choose Category
                                     </h2>
+
                                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm space-y-3">
+                                        {/* ✅ Main Category */}
                                         <div>
-                                            <label htmlFor="mainCategory" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Main Category
+                                        <label
+                                            htmlFor="mainCategory"
+                                            className="block text-sm font-medium text-gray-700 mb-1"
+                                        >
+                                            Category
+                                        </label>
+                                        <select
+                                            id="mainCategory"
+                                            value={mainCategory}
+                                            onChange={(e) => handleMainCategoryChange(e.target.value)}
+                                            className="w-full border rounded-lg px-3 py-2 bg-white"
+                                            required
+                                        >
+                                            <option value="">Select Category</option>
+                                            {categories.map((category) => (
+                                            <option key={category.slug} value={category.slug}>
+                                                {category.categoryName}
+                                            </option>
+                                            ))}
+                                        </select>
+                                        </div>
+
+                                        {/* ✅ Subcategory */}
+                                        {mainCategory && (
+                                        <div>
+                                            <label
+                                            htmlFor="subCategory"
+                                            className="block text-sm font-medium text-gray-700 mb-1"
+                                            >
+                                            Subcategory
                                             </label>
                                             <select
-                                                id="mainCategory"
-                                                value={mainCategory}
-                                                onChange={(e) => handleMainCategoryChange(e.target.value)}
-                                                className="w-full border rounded-lg px-3 py-2 bg-white"
-                                                required
+                                            id="subCategory"
+                                            value={subCategory}
+                                             onChange={(e) => handleSubCategoryChange(JSON.parse(e.target.value))}
+                                            className="w-full border rounded-lg px-3 py-2 bg-white"
+                                            required
                                             >
-                                                <option value="">Select main category</option>
-                                                {mainCategories.map(category => (
-                                                    <option key={category.slug} value={category.slug}>
-                                                        {category.name}
-                                                    </option>
+                                            <option value="">Select Subcategory</option>
+                                            {categories
+                                                .find((cat) => cat.slug === mainCategory)
+                                                ?.subcategories?.map((sub) => (
+                                                <option key={sub.slug} value={JSON.stringify(sub)}>
+                                                    {sub.name}
+                                                </option>
                                                 ))}
                                             </select>
                                         </div>
-                                        
-                                        {mainCategory && (
-                                            <div>
-                                                <label htmlFor="subCategory" className="block text-sm font-medium text-gray-700 mb-1">
-                                                    Subcategory
-                                                </label>
-                                                <select
-                                                    id="subCategory"
-                                                    value={subCategory}
-                                                    onChange={(e) => handleSubCategoryChange(e.target.value)}
-                                                    className="w-full border rounded-lg px-3 py-2 bg-white"
-                                                    required
-                                                >
-                                                    <option value="">Select subcategory</option>
-                                                    {subCategories.map(category => (
-                                                        <option key={category.slug} value={category.slug}>
-                                                            {category.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
                                         )}
                                     </div>
-                                </div>
+                                    </div>
+
 
                                 {/* Step 2: Location */}
                                 <div>
@@ -412,26 +411,77 @@ import React, { useState, useEffect } from "react";
                                         2. Choose Location
                                     </h2>
                                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm space-y-3">
+                                    {/* ✅ Region Select */}
+                                    {!selectedRegion ? (
                                         <div>
-                                            <label htmlFor="region" className="block text-sm font-medium text-gray-700 mb-1">
-                                                Region
-                                            </label>
-                                            <select
-                                                id="region"
-                                                value={selectedRegion}
-                                                onChange={(e) => setSelectedRegion(e.target.value)}
-                                                className="w-full border rounded-lg px-3 py-2 bg-white"
-                                                required
+                                        <label
+                                            htmlFor="region"
+                                            className="block text-sm font-medium text-gray-700 mb-1"
+                                        >
+                                            Region
+                                        </label>
+                                        <select
+                                            id="region"
+                                            value={selectedRegion}
+                                            onChange={(e) => setSelectedRegion(e.target.value)}
+                                            className="w-full border rounded-lg px-3 py-2 bg-white"
+                                            required
+                                        >
+                                            <option value="">Select region</option>
+                                            {regions.map((region) => (
+                                            <option key={region.slug} value={region.slug}>
+                                                {region.region}
+                                            </option>
+                                            ))}
+                                        </select>
+                                        </div>
+                                    ) : (
+                                        <>
+                                        {/* ✅ Zone Select (shown only when region selected) */}
+                                        <div>
+                                            <div className="flex justify-between items-center mb-1">
+                                            <label
+                                                htmlFor="zone"
+                                                className="block text-sm font-medium text-gray-700"
                                             >
-                                                <option value="">Select region</option>
-                                                {regions.map(region => (
-                                                    <option key={region.slug} value={region.slug}>
-                                                        {region.name}
-                                                    </option>
+                                                Zone —{" "}
+                                                <span className="text-emerald-600 font-semibold">
+                                                {regions.find((r) => r.slug === selectedRegion)?.name}
+                                                </span>
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                setSelectedRegion("");
+                                                setSelectedZone("");
+                                                }}
+                                                className="text-xs text-red-500 hover:text-red-600 underline"
+                                            >
+                                                Change
+                                            </button>
+                                            </div>
+
+                                            <select
+                                            id="zone"
+                                            value={selectedZone}
+                                            onChange={(e) => setSelectedZone(e.target.value)}
+                                            className="w-full border rounded-lg px-3 py-2 bg-white"
+                                            required
+                                            >
+                                            <option value="">Select Zone</option>
+                                            {regions
+                                                .find((r) => r.slug === selectedRegion)
+                                                ?.zones?.map((zone) => (
+                                                <option key={zone.slug} value={zone.slug}>
+                                                    {zone.zone}
+                                                </option>
                                                 ))}
                                             </select>
                                         </div>
+                                        </>
+                                    )}
                                     </div>
+
                                 </div>
 
                                 {/* Step 3: Video URL */}
