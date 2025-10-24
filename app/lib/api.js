@@ -11,18 +11,28 @@ export async function fetchAPI(path, { cache = "force-cache" } = {}) {
 
   try {
     const res = await fetch(url, { cache });
-
     console.log("🔵 Status:", res.status, "for", url);
 
     if (!res.ok) {
-      console.error("❌ Failed:", url, "Status:", res.status);
+      console.error("❌ HTTP Error:", res.status, "for", url);
       throw new Error(`HTTP ${res.status}`);
     }
 
     const json = await res.json();
+
+    if (json === null || json === undefined) {
+      console.error("⚠️ JSON null/undefined for:", url);
+      return null;
+    }
+
+    // Optional deeper validation (if your endpoints should return objects)
+    if (typeof json !== "object") {
+      console.error("⚠️ Invalid JSON format for:", url, json);
+      return null;
+    }
+
     console.log("✅ Success:", url);
     return json;
-
   } catch (err) {
     console.warn(`⚠️ API fetch failed for ${url}:`, err.message);
     return null;
@@ -33,28 +43,15 @@ export async function fetchAPI(path, { cache = "force-cache" } = {}) {
 export const api = {
   getSeller: (slug) => fetchAPI(`/seller/${slug}`, { cache: "no-store" }),
   getSellerFeedbacks: (slug) => fetchAPI(`/seller/feedbacks/${slug}`, { cache: "no-store" }),
-
-  // 🛒 Seller ads
   getSellerAds: (slug) => fetchAPI(`/seller/${slug}/ads`, { cache: "no-store" }),
-  searchAds: (query, locationSlug) =>
-    fetchAPI(`/ads/search?q=${encodeURIComponent(query)}&location=${locationSlug}`, {
-      cache: "no-store",
-    }),
-  // 🏠 Homepage
-  getHomepageAds: (from = 0, to = 10) =>
-    fetchAPI(`/ads/random?from=${from}&to=${to}`, { cache: "no-store" }),
-
-  // 🌍 Regions with ad count
+  searchAds: (query, locationSlug) => fetchAPI(`/ads/search?q=${encodeURIComponent(query)}&location=${locationSlug}`, {
+      cache: "no-store", }),
+  getHomepageAds: (from = 0, to = 10) => fetchAPI(`/ads/random?from=${from}&to=${to}`, { cache: "no-store" }),
   getRegions: () => fetchAPI("/regions/with-count"),
-
-  // 🗂️ Categories with subcategories and counts
   getCategories: () => fetchAPI("/categories/with-count"),
   getCategoriesAll: () => fetchAPI("/categories/all"),
   getAdsAll: (from = 0, to = 20) => fetchAPI(`/ads/random?from=${from}&to=${to}`, { cache: "no-store" }),
-  // getAdsAll: () => fetchAPI("/ads/all"),
   getUser: (id) => fetchAPI(`/user/${id}`, { cache: "no-store" }),
   getUserAds: (id) => fetchAPI(`/user/${id}/ads`, { cache: "no-store" }),
-
-  // 📦 Ads by category
   getCategoryAds: (slug) => fetchAPI(`/ads/category/${slug}`, { cache: "no-store" }),
 };

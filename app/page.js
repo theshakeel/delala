@@ -1,9 +1,9 @@
+export const revalidate = 0;
 import { loadHomeData } from "./lib/dataProvider";
 import HomeClient from "./components/HomeClient";
 // import Header from "./components/Header";
 // import Footer from "./components/Footer";
 
-export const revalidate = 60; // optional: revalidate every minute (ISR)
 
 export default async function HomePage() {
   const { regions, categories, ads } = await loadHomeData();
