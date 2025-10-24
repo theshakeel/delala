@@ -11,57 +11,107 @@ export function AuthProvider({ children }) {
   const [modalMode, setModalMode] = useState("login"); // 'login' | 'register'
 
   // 🧩 Load user when app starts
-  useEffect(() => {
-   const loadUser = async () => {
-  try {
-    setLoading(true);
+useEffect(() => {
+  const loadUser = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      if (!token) return; // not logged in
 
-    // Fetch user ID=1 (replace with real session/user ID later)
-    const res = await api.getUser(1);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (res?.success && res?.data) {
-      setUser(res.data);
-      // No localStorage storage
-    } else {
+      if (!res.ok) throw new Error("Token invalid");
+      const json = await res.json();
+      setUser(json); // Laravel returns the authenticated user
+    } catch (err) {
+      console.error("Failed to load user:", err);
+      localStorage.removeItem("token");
       setUser(null);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Failed to load user:", err);
-    setUser(null);
+  };
+
+  loadUser();
+}, []);
+
+
+  // 🧱 Login (mock for now)
+const login = async ({ email, password }) => {
+  setLoading(true);
+  try {
+    const res = await fetch(
+  `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/login`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  }
+);
+
+const json = await res.json();
+
+if (res.ok && json.access_token) {
+  localStorage.setItem("token", json.access_token);
+  setUser(json.user);
+  setModalOpen(false);
+} else {
+  alert(json.message || "Login failed");
+}
+
+
+    // if (res?.success && res?.data) {
+    //   setUser(res.data);
+    // } else {
+    //   alert(res?.message || "Login failed");
+    // }
   } finally {
     setLoading(false);
   }
 };
 
-    loadUser();
-  }, []);
-
-  // 🧱 Login (mock for now)
-  const login = async ({ email, password }) => {
-    setLoading(true);
-    try {
-      // TODO: Replace with real API
-      const fakeUser = { id: 1, name: "Ahmed", email };
-      setUser(fakeUser);
-      localStorage.setItem("user", JSON.stringify(fakeUser));
-      setModalOpen(false);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // 🧱 Register (mock for now)
-  const register = async (data) => {
-    setLoading(true);
-    try {
-      const fakeUser = { id: 2, name: data.firstName, email: data.email };
-      setUser(fakeUser);
-      localStorage.setItem("user", JSON.stringify(fakeUser));
+ // 🧱 Register user with Laravel API (JWT)
+const register = async (data) => {
+  setLoading(true);
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/register`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: `${data.firstName} ${data.lastName}`,
+          email: data.email,
+          password: data.password,
+          phone: data.phone,
+        }),
+      }
+    );
+
+    const json = await res.json();
+
+    if (res.ok && json.access_token) {
+      // ✅ Save token & user
+      localStorage.setItem("token", json.access_token);
+      setUser(json.user);
       setModalOpen(false);
-    } finally {
-      setLoading(false);
+    } else {
+      alert(json.message || "Registration failed");
     }
-  };
+  } catch (err) {
+    console.error("Registration error:", err);
+    alert("Registration failed. Check console for details.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // 🧱 Logout
   const logout = () => {

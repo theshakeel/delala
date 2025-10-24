@@ -383,22 +383,31 @@ import React, { useState, useEffect } from "react";
                                             >
                                             Subcategory
                                             </label>
-                                            <select
-                                            id="subCategory"
-                                            value={subCategory}
-                                             onChange={(e) => handleSubCategoryChange(JSON.parse(e.target.value))}
-                                            className="w-full border rounded-lg px-3 py-2 bg-white"
-                                            required
-                                            >
-                                            <option value="">Select Subcategory</option>
-                                            {categories
-                                                .find((cat) => cat.slug === mainCategory)
-                                                ?.subcategories?.map((sub) => (
-                                                <option key={sub.slug} value={JSON.stringify(sub)}>
-                                                    {sub.name}
-                                                </option>
-                                                ))}
-                                            </select>
+                                         <select
+  id="subCategory"
+  value={subCategory || ""}
+  onChange={(e) => {
+    const selectedSlug = e.target.value;
+    const parent = categories.find((cat) => cat.slug === mainCategory);
+    const selectedSub = parent?.subcategories?.find(
+      (sub) => sub.slug === selectedSlug
+    );
+    handleSubCategoryChange(selectedSub);
+  }}
+  className="w-full border rounded-lg px-3 py-2 bg-white"
+  required
+>
+  <option value="">Select Subcategory</option>
+  {categories
+    .find((cat) => cat.slug === mainCategory)
+    ?.subcategories?.map((sub) => (
+      <option key={sub.slug} value={sub.slug}>
+        {sub.name}
+      </option>
+    ))}
+</select>
+
+
                                         </div>
                                         )}
                                     </div>

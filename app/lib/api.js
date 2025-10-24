@@ -4,17 +4,31 @@ const BASE_URL =
   process.env.API_BASE_URL ||
   "https://offline.local/api";
 
+
 export async function fetchAPI(path, { cache = "force-cache" } = {}) {
+  const url = `${BASE_URL}${path}`;
+  console.log("🟡 Fetching:", url);
+
   try {
-    const res = await fetch(`${BASE_URL}${path}`, { cache });
-    if (!res.ok) {console.log("path ", path, "failed"); throw new Error(`HTTP ${res.status}`);}
-    return res.json();
+    const res = await fetch(url, { cache });
+
+    console.log("🔵 Status:", res.status, "for", url);
+
+    if (!res.ok) {
+      console.error("❌ Failed:", url, "Status:", res.status);
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const json = await res.json();
+    console.log("✅ Success:", url);
+    return json;
+
   } catch (err) {
-    console.warn(`⚠️ API fetch failed for ${path}:`, err.message);
-    // Return null so dataProvider can trigger dummy fallback
+    console.warn(`⚠️ API fetch failed for ${url}:`, err.message);
     return null;
   }
 }
+
 
 export const api = {
   getSeller: (slug) => fetchAPI(`/seller/${slug}`, { cache: "no-store" }),
