@@ -9,7 +9,7 @@ export async function loadHomeData() {
       api.getHomepageAds(),
       api.getAdsAll(),
     ]);
-
+    
 
     if (!regions || !categories || !ads) {
       console.error("❌ One or more API responses are null or invalid");

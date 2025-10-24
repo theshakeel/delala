@@ -1,586 +1,524 @@
 "use client";
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, Store, Phone, Mail } from "lucide-react";
+
 export default function ProfileSection() {
-const [activeTab, setActiveTab] = useState("Personal Details");
-const [activeMenu, setActiveMenu] = useState('Profile');
-const [sidebarOpen, setSidebarOpen] = useState(false);
-const [showAddStore, setShowAddStore] = useState(false);
-const [showAddDelivery, setShowAddDelivery] = useState(false);
-const [showAddPhone, setShowAddPhone] = useState(false);
-const [showOtpVerify, setShowOtpVerify] = useState(false);
-const [showDeleteModal, setShowDeleteModal] = useState(false);
-const [chargeFee, setChargeFee] = useState(false);
-const [selectedDays, setSelectedDays] = useState([]);
-    const [toggles, setToggles] = useState({
-                googleLogin: false,
-                facebookLogin: false,
-                disableChats: false,
-                disableFeedback: false,
-                messages: true,
-                offers: true,
-                expiry: false,
-                system: true
-            });
-    const profileTabs = [
-        'Personal Details',
-        'Business Details',
-        'Phone Numbers',
-        'Change Email',
-        'Disable Chats',
-        'Disable Feedback',
-        'Notifications',
-        'Change Password'
-    ];
-  const handleToggle = (key) => {
-                setToggles(prev => ({ ...prev, [key]: !prev[key] }));
-            };  
-  const renderChangeEmail = () => (
-    <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold">Change Email Address</h3>
-            <div>
-                <label htmlFor="currentEmail" className="block text-sm font-medium text-gray-700 mb-1">Current Email</label>
-                <input type="email" id="currentEmail" className="border rounded px-3 py-2 w-full" value="user@example.com" disabled />
-            </div>
-            <div>
-                <label htmlFor="newEmail" className="block text-sm font-medium text-gray-700 mb-1">New Email</label>
-                <input type="email" id="newEmail" className="border rounded px-3 py-2 w-full" placeholder="Enter new email" />
-            </div>
-            <button 
-                onClick={() => alert('Verification email sent!')}
-                className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2"
-            >
-                Save & Verify
-            </button>
-        </div>
-    </div>
-    );
+  const [activeTab, setActiveTab] = useState("Personal Details");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    const renderDisableChats = () => (
-    <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold">Chat Settings</h3>
-            <p className="text-gray-600">Disable chats to prevent users from messaging you directly about your listings.</p>
-            <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Disable All Chats</span>
-                <button
-                    role="switch"
-                    aria-checked={toggles.disableChats}
-                    onClick={() => handleToggle('disableChats')}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        toggles.disableChats ? 'bg-red-500' : 'bg-[var(--delala-green)]'
-                    }`}
-                >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        toggles.disableChats ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                </button>
-            </div>
-        </div>
-    </div>
-    );
+  const [form, setForm] = useState({
+    // Personal Details
+    name: "",
+    username: "",
+    location: "",
+    bio: "",
+    avatar: "",
+    cover_image: "",
+    
+    // Business Details
+    shop_name: "",
+    shop_url: "",
+    shop_logo: "",
+    shop_address: "",
+    shop_description: "",
+    business_hours: "",
+    
+    // Contact
+    email: "",
+    phone: "",
+  });
 
-    const renderDisableFeedback = () => (
-    <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold">Feedback Settings</h3>
-            <p className="text-gray-600">Disable feedback to prevent users from leaving reviews on your profile and listings.</p>
-            <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Disable All Feedback</span>
-                <button
-                    role="switch"
-                    aria-checked={toggles.disableFeedback}
-                    onClick={() => handleToggle('disableFeedback')}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        toggles.disableFeedback ? 'bg-red-500' : 'bg-[var(--delala-green)]'
-                    }`}
-                >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        toggles.disableFeedback ? 'translate-x-6' : 'translate-x-1'
-                    }`} />
-                </button>
-            </div>
-        </div>
-    </div>
-    );
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: "",
+    new_password: "",
+    new_password_confirmation: "",
+  });
 
-    const renderNotifications = () => (
-    <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold">Notification Preferences</h3>
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <span className="text-sm font-medium">New Messages</span>
-                        <p className="text-xs text-gray-500">Get notified when someone messages you</p>
-                    </div>
-                    <button
-                        role="switch"
-                        aria-checked={toggles.messages}
-                        onClick={() => handleToggle('messages')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            toggles.messages ? 'bg-[var(--delala-green)]' : 'bg-gray-200'
-                        }`}
-                    >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            toggles.messages ? 'translate-x-6' : 'translate-x-1'
-                        }`} />
-                    </button>
-                </div>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <span className="text-sm font-medium">Special Offers</span>
-                        <p className="text-xs text-gray-500">Receive promotional offers and deals</p>
-                    </div>
-                    <button
-                        role="switch"
-                        aria-checked={toggles.offers}
-                        onClick={() => handleToggle('offers')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            toggles.offers ? 'bg-[var(--delala-green)]' : 'bg-gray-200'
-                        }`}
-                    >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            toggles.offers ? 'translate-x-6' : 'translate-x-1'
-                        }`} />
-                    </button>
-                </div>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <span className="text-sm font-medium">Listing Expiry</span>
-                        <p className="text-xs text-gray-500">Alerts when your listings are about to expire</p>
-                    </div>
-                    <button
-                        role="switch"
-                        aria-checked={toggles.expiry}
-                        onClick={() => handleToggle('expiry')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            toggles.expiry ? 'bg-[var(--delala-green)]' : 'bg-gray-200'
-                        }`}
-                    >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            toggles.expiry ? 'translate-x-6' : 'translate-x-1'
-                        }`} />
-                    </button>
-                </div>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <span className="text-sm font-medium">System Updates</span>
-                        <p className="text-xs text-gray-500">Important platform updates and maintenance</p>
-                    </div>
-                    <button
-                        role="switch"
-                        aria-checked={toggles.system}
-                        onClick={() => handleToggle('system')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            toggles.system ? 'bg-[var(--delala-green)]' : 'bg-gray-200'
-                        }`}
-                    >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            toggles.system ? 'translate-x-6' : 'translate-x-1'
-                        }`} />
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    );
+  const profileTabs = [
+    "Personal Details",
+    "Business Details",
+    "Contact Information",
+    "Change Password",
+  ];
 
-    const renderChangePassword = () => (
-    <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold">Change Password</h3>
-            <div>
-                <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                <input type="password" id="currentPassword" className="border rounded px-3 py-2 w-full" placeholder="Enter current password" />
-            </div>
-            <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                <input type="password" id="newPassword" className="border rounded px-3 py-2 w-full" placeholder="Enter new password" />
-            </div>
-            <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                <input type="password" id="confirmPassword" className="border rounded px-3 py-2 w-full" placeholder="Confirm new password" />
-            </div>
-            <button 
-                onClick={() => alert('Password change requires OTP verification')}
-                className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2"
-            >
-                Change Password
-            </button>
-        </div>
-    </div>
-    );    
- const renderPhoneNumbers = () => (
-    <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold">Phone Numbers</h3>
-            <div className="space-y-2">
-                <div className="flex items-center justify-between p-3 bg-white rounded border">
-                    <span>+1 (555) 123-4567</span>
-                    <span className="text-green-600 text-sm">Verified</span>
-                </div>
-            </div>
-            
-            {!showAddPhone && !showOtpVerify && (
-                <button 
-                    onClick={() => setShowAddPhone(true)}
-                    className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2 flex items-center space-x-2"
-                >
-                    <Plus />
-                    <span>Add Phone</span>
-                </button>
-            )}
-            
-            {showAddPhone && (
-                <div className="border-t pt-4 space-y-4">
-                    <div>
-                        <label htmlFor="newPhone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                        <input type="tel" id="newPhone" className="border rounded px-3 py-2 w-full" placeholder="+1 (555) 000-0000" />
-                    </div>
-                    <div className="flex space-x-2">
-                        <button 
-                            onClick={() => {
-                                setShowAddPhone(false);
-                                setShowOtpVerify(true);
-                            }}
-                            className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2"
-                        >
-                            Send OTP
-                        </button>
-                        <button 
-                            onClick={() => setShowAddPhone(false)}
-                            className="bg-gray-500 hover:bg-gray-600 text-white font-medium rounded px-4 py-2"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            )}
-            
-            {showOtpVerify && (
-                <div className="border-t pt-4 space-y-4">
-                    <p className="text-sm text-gray-600">Enter the 6-digit code sent to your phone</p>
-                    <div className="flex space-x-2">
-                        {[1,2,3,4,5,6].map(i => (
-                            <input 
-                                key={i}
-                                type="text" 
-                                maxLength="1" 
-                                className="w-12 h-12 text-center border rounded font-mono text-lg"
-                            />
-                        ))}
-                    </div>
-                    <div className="flex space-x-2">
-                        <button 
-                            onClick={() => {
-                                alert('Phone verified!');
-                                setShowOtpVerify(false);
-                            }}
-                            className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2"
-                        >
-                            Confirm
-                        </button>
-                        <button 
-                            onClick={() => alert('OTP resent!')}
-                            className="bg-gray-500 hover:bg-gray-600 text-white font-medium rounded px-4 py-2"
-                        >
-                            Resend
-                        </button>
-                    </div>
-                </div>
-            )}
-        </div>
-    </div>
-);    
-const renderBusinessDetails = () => (
-    <div className="space-y-4">
-        {/* Company Info Card */}
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold">Company Information</h3>
-            <div>
-                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
-                <input type="text" id="companyName" className="border rounded px-3 py-2 w-full" placeholder="Enter company name" />
-            </div>
-            <div>
-                <label htmlFor="about" className="block text-sm font-medium text-gray-700 mb-1">About</label>
-                <textarea id="about" rows="3" className="border rounded px-3 py-2 w-full" placeholder="Tell us about your business"></textarea>
-            </div>
-            <div>
-                <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-1">Business Slug</label>
-                <input type="text" id="slug" className="border rounded px-3 py-2 w-full" placeholder="your-business-name" />
-            </div>
-            <button 
-                onClick={() => alert('Company info saved!')}
-                className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2"
-            >
-                Save
-            </button>
-        </div>
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-        {/* Store Section Card */}
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Store Locations</h3>
-                <button 
-                    onClick={() => setShowAddStore(!showAddStore)}
-                    className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2 flex items-center space-x-2"
-                >
-                    <Plus />
-                    <span>Add Store</span>
-                </button>
-            </div>
-            
-            {showAddStore && (
-                <div className="border-t pt-4 space-y-4">
-                    <div>
-                        <label htmlFor="storeName" className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
-                        <input type="text" id="storeName" className="border rounded px-3 py-2 w-full" placeholder="Enter store name" />
-                    </div>
-                    <div>
-                        <label htmlFor="storeRegion" className="block text-sm font-medium text-gray-700 mb-1">Region</label>
-                        <input type="text" id="storeRegion" className="border rounded px-3 py-2 w-full" placeholder="Enter region" />
-                    </div>
-                    <div>
-                        <label htmlFor="storeAddress" className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                        <textarea id="storeAddress" rows="2" className="border rounded px-3 py-2 w-full" placeholder="Enter full address"></textarea>
-                    </div>
-                    <div>
-                        <label htmlFor="howToFind" className="block text-sm font-medium text-gray-700 mb-1">How to Find</label>
-                        <textarea id="howToFind" rows="2" className="border rounded px-3 py-2 w-full" placeholder="Directions or landmarks"></textarea>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="openTime" className="block text-sm font-medium text-gray-700 mb-1">Opening Time</label>
-                            <input type="time" id="openTime" className="border rounded px-3 py-2 w-full" />
-                        </div>
-                        <div>
-                            <label htmlFor="closeTime" className="block text-sm font-medium text-gray-700 mb-1">Closing Time</label>
-                            <input type="time" id="closeTime" className="border rounded px-3 py-2 w-full" />
-                        </div>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Operating Days</label>
-                        <div className="flex flex-wrap gap-2">
-                            {weekdays.map(day => (
-                                <button
-                                    key={day}
-                                    onClick={() => handleDayToggle(day)}
-                                    className={`inline-flex px-2 py-1 text-sm rounded-full transition-colors ${
-                                        selectedDays.includes(day)
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-gray-100 hover:bg-green-100'
-                                    }`}
-                                >
-                                    {day}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <button 
-                        onClick={() => {
-                            alert('Store added!');
-                            setShowAddStore(false);
-                        }}
-                        className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2"
-                    >
-                        Save Store
-                    </button>
-                </div>
-            )}
-        </div>
+  // ✅ Fetch user info on load
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return setLoading(false);
+      
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (!res.ok) throw new Error("Failed to load user");
+        
+        const data = await res.json();
+        setUser(data);
 
-        {/* Delivery Section Card */}
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Delivery Options</h3>
-                <button 
-                    onClick={() => setShowAddDelivery(!showAddDelivery)}
-                    className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2 flex items-center space-x-2"
-                >
-                    <Plus />
-                    <span>Add Delivery</span>
-                </button>
-            </div>
-            
-            {showAddDelivery && (
-                <div className="border-t pt-4 space-y-4">
-                    <div>
-                        <label htmlFor="deliveryName" className="block text-sm font-medium text-gray-700 mb-1">Delivery Name</label>
-                        <input type="text" id="deliveryName" className="border rounded px-3 py-2 w-full" placeholder="e.g., Same Day Delivery" />
-                    </div>
-                    <div>
-                        <label htmlFor="deliveryRegion" className="block text-sm font-medium text-gray-700 mb-1">Region</label>
-                        <input type="text" id="deliveryRegion" className="border rounded px-3 py-2 w-full" placeholder="Enter delivery region" />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="deliveryFrom" className="block text-sm font-medium text-gray-700 mb-1">Delivery From</label>
-                            <select id="deliveryFrom" className="border rounded px-3 py-2 w-full">
-                                <option>Monday</option>
-                                <option>Tuesday</option>
-                                <option>Wednesday</option>
-                                <option>Thursday</option>
-                                <option>Friday</option>
-                                <option>Saturday</option>
-                                <option>Sunday</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label htmlFor="deliveryTo" className="block text-sm font-medium text-gray-700 mb-1">Delivery To</label>
-                            <select id="deliveryTo" className="border rounded px-3 py-2 w-full">
-                                <option>Monday</option>
-                                <option>Tuesday</option>
-                                <option>Wednesday</option>
-                                <option>Thursday</option>
-                                <option>Friday</option>
-                                <option>Saturday</option>
-                                <option>Sunday</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Charge Delivery Fee?</span>
-                        <button
-                            role="switch"
-                            aria-checked={chargeFee}
-                            onClick={() => setChargeFee(!chargeFee)}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                chargeFee ? 'bg-[var(--delala-green)]' : 'bg-gray-200'
-                            }`}
-                        >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                chargeFee ? 'translate-x-6' : 'translate-x-1'
-                            }`} />
-                        </button>
-                    </div>
-                    {chargeFee && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label htmlFor="minFee" className="block text-sm font-medium text-gray-700 mb-1">Minimum Fee ($)</label>
-                                <input type="number" id="minFee" className="border rounded px-3 py-2 w-full" placeholder="0.00" />
-                            </div>
-                            <div>
-                                <label htmlFor="maxFee" className="block text-sm font-medium text-gray-700 mb-1">Maximum Fee ($)</label>
-                                <input type="number" id="maxFee" className="border rounded px-3 py-2 w-full" placeholder="0.00" />
-                            </div>
-                        </div>
-                    )}
-                    <button 
-                        onClick={() => {
-                            alert('Delivery option added!');
-                            setShowAddDelivery(false);
-                        }}
-                        className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2"
-                    >
-                        Save Delivery
-                    </button>
-                </div>
-            )}
-        </div>
-    </div>
-);    
+        // Populate form with user data
+        setForm({
+          name: data.name || "",
+          username: data.username || "",
+          location: data.location || "",
+          bio: data.bio || "",
+          avatar: data.avatar || "",
+          cover_image: data.cover_image || "",
+          shop_name: data.shop_name || "",
+          shop_url: data.shop_url || "",
+          shop_logo: data.shop_logo || "",
+          shop_address: data.shop_address || "",
+          shop_description: data.shop_description || "",
+          business_hours: data.business_hours || "",
+          email: data.email || "",
+          phone: data.phone || "",
+        });
+      } catch (e) {
+        console.error(e);
+        alert("Failed to load user profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUser();
+  }, [API_BASE]);
+
+  // ✅ Save to Laravel
+  const saveProfile = async (payload) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in first");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/user/update`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      
+      if (json.success) {
+        alert(json.message || "Profile updated successfully");
+        setUser(json.user);
+        
+        // Update form state with new user data
+        setForm(prev => ({
+          ...prev,
+          ...json.user
+        }));
+        
+        // Clear password fields if they were used
+        if (payload.new_password) {
+          setPasswordForm({
+            current_password: "",
+            new_password: "",
+            new_password_confirmation: "",
+          });
+        }
+      } else {
+        // Handle validation errors
+        if (json.errors) {
+          const errorMessages = Object.values(json.errors).flat().join('\n');
+          alert(errorMessages);
+        } else {
+          alert(json.message || "Update failed");
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error saving profile");
+    }
+  };
+
+  // ✅ Personal Details Tab
   const renderPersonalDetails = () => (
     <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-4 shadow-sm space-y-4">
-            <h3 className="text-lg font-semibold">Personal Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                    <input type="text" id="firstName" className="border rounded px-3 py-2 w-full" placeholder="Enter first name" />
-                </div>
-                <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                    <input type="text" id="lastName" className="border rounded px-3 py-2 w-full" placeholder="Enter last name" />
-                </div>
-            </div>
-            <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                <select id="location" className="border rounded px-3 py-2 w-full">
-                    <option>Select location</option>
-                    <option>New York</option>
-                    <option>Los Angeles</option>
-                    <option>Chicago</option>
-                </select>
-            </div>
-            <div>
-                <label htmlFor="birthday" className="block text-sm font-medium text-gray-700 mb-1">Birthday</label>
-                <input type="date" id="birthday" className="border rounded px-3 py-2 w-full" />
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
-                <div className="flex space-x-4">
-                    <label className="flex items-center">
-                        <input type="radio" name="gender" value="male" className="mr-2" />
-                        Male
-                    </label>
-                    <label className="flex items-center">
-                        <input type="radio" name="gender" value="female" className="mr-2" />
-                        Female
-                    </label>
-                    <label className="flex items-center">
-                        <input type="radio" name="gender" value="other" className="mr-2" />
-                        Other
-                    </label>
-                </div>
-            </div>
-            <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Google Login</span>
-                    <button
-                        role="switch"
-                        aria-checked={toggles.googleLogin}
-                        onClick={() => handleToggle('googleLogin')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            toggles.googleLogin ? 'bg-[var(--delala-green)]' : 'bg-gray-200'
-                        }`}
-                    >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            toggles.googleLogin ? 'translate-x-6' : 'translate-x-1'
-                        }`} />
-                    </button>
-                </div>
-                <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Facebook Login</span>
-                    <button
-                        role="switch"
-                        aria-checked={toggles.facebookLogin}
-                        onClick={() => handleToggle('facebookLogin')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            toggles.facebookLogin ? 'bg-[var(--delala-green)]' : 'bg-gray-200'
-                        }`}
-                    >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            toggles.facebookLogin ? 'translate-x-6' : 'translate-x-1'
-                        }`} />
-                    </button>
-                </div>
-            </div>
-            <button 
-                onClick={() => alert('Personal details saved!')}
-                className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-4 py-2"
-            >
-                Save Changes
-            </button>
-        </div>
-    </div>
-);  
-  return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Profile Settings</h2>
+      <div className="bg-gray-50 rounded-lg p-6 shadow-sm space-y-4">
+        <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name
+            </label>
+            <input
+              type="text"
+              placeholder="Full Name"
+              className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+          </div>
 
-      {/* Tabs */}
-      <div className="border-b">
-        <div className="flex flex-wrap -mb-px">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Username
+            </label>
+            <input
+              type="text"
+              placeholder="Username"
+              className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Location
+          </label>
+          <input
+            type="text"
+            placeholder="City, Country"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={form.location}
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Bio
+          </label>
+          <textarea
+            placeholder="Tell us about yourself..."
+            rows={4}
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={form.bio}
+            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Avatar URL
+            </label>
+            <input
+              type="text"
+              placeholder="https://example.com/avatar.jpg"
+              className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              value={form.avatar}
+              onChange={(e) => setForm({ ...form, avatar: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cover Image URL
+            </label>
+            <input
+              type="text"
+              placeholder="https://example.com/cover.jpg"
+              className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              value={form.cover_image}
+              onChange={(e) => setForm({ ...form, cover_image: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={() =>
+            saveProfile({
+              name: form.name,
+              username: form.username,
+              location: form.location,
+              bio: form.bio,
+              avatar: form.avatar,
+              cover_image: form.cover_image,
+            })
+          }
+          className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-6 py-2 transition-colors"
+        >
+          Save Personal Details
+        </button>
+      </div>
+    </div>
+  );
+
+  // ✅ Business Details Tab
+  const renderBusinessDetails = () => (
+    <div className="space-y-4">
+      <div className="bg-gray-50 rounded-lg p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Store className="w-5 h-5 text-green-600" />
+          <h3 className="text-lg font-semibold">Business/Shop Information</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Shop Name
+            </label>
+            <input
+              type="text"
+              placeholder="Your Shop Name"
+              className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              value={form.shop_name}
+              onChange={(e) => setForm({ ...form, shop_name: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Shop URL/Slug
+            </label>
+            <input
+              type="text"
+              placeholder="my-shop-url"
+              className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              value={form.shop_url}
+              onChange={(e) => setForm({ ...form, shop_url: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Shop Address
+          </label>
+          <input
+            type="text"
+            placeholder="123 Main Street, City"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={form.shop_address}
+            onChange={(e) => setForm({ ...form, shop_address: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Shop Logo URL
+          </label>
+          <input
+            type="text"
+            placeholder="https://example.com/logo.png"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={form.shop_logo}
+            onChange={(e) => setForm({ ...form, shop_logo: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Shop Description
+          </label>
+          <textarea
+            placeholder="Describe your business..."
+            rows={4}
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={form.shop_description}
+            onChange={(e) => setForm({ ...form, shop_description: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Business Hours
+          </label>
+          <input
+            type="text"
+            placeholder="Mon-Fri: 9AM-6PM"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={form.business_hours}
+            onChange={(e) => setForm({ ...form, business_hours: e.target.value })}
+          />
+        </div>
+
+        <button
+          onClick={() =>
+            saveProfile({
+              shop_name: form.shop_name,
+              shop_url: form.shop_url,
+              shop_address: form.shop_address,
+              shop_logo: form.shop_logo,
+              shop_description: form.shop_description,
+              business_hours: form.business_hours,
+            })
+          }
+          className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-6 py-2 transition-colors"
+        >
+          Save Business Details
+        </button>
+      </div>
+    </div>
+  );
+
+  // ✅ Contact Information Tab
+  const renderContactInformation = () => (
+    <div className="space-y-4">
+      <div className="bg-gray-50 rounded-lg p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 mb-4">
+          <Mail className="w-5 h-5 text-green-600" />
+          <h3 className="text-lg font-semibold">Contact Information</h3>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email Address
+          </label>
+          <input
+            type="email"
+            placeholder="your@email.com"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Changing your email may require verification
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            <div className="flex items-center gap-1">
+              <Phone className="w-4 h-4" />
+              Phone Number
+            </div>
+          </label>
+          <input
+            type="tel"
+            placeholder="+1 234 567 8900"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
+        </div>
+
+        <button
+          onClick={() =>
+            saveProfile({
+              email: form.email,
+              phone: form.phone,
+            })
+          }
+          className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-6 py-2 transition-colors"
+        >
+          Save Contact Information
+        </button>
+      </div>
+    </div>
+  );
+
+  // ✅ Change Password Tab
+  const renderChangePassword = () => (
+    <div className="space-y-4">
+      <div className="bg-gray-50 rounded-lg p-6 shadow-sm space-y-4">
+        <h3 className="text-lg font-semibold mb-4">Change Password</h3>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Current Password
+          </label>
+          <input
+            type="password"
+            placeholder="Enter current password"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={passwordForm.current_password}
+            onChange={(e) =>
+              setPasswordForm({ ...passwordForm, current_password: e.target.value })
+            }
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            New Password
+          </label>
+          <input
+            type="password"
+            placeholder="Enter new password (min. 8 characters)"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={passwordForm.new_password}
+            onChange={(e) =>
+              setPasswordForm({ ...passwordForm, new_password: e.target.value })
+            }
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Confirm New Password
+          </label>
+          <input
+            type="password"
+            placeholder="Re-enter new password"
+            className="border border-gray-300 rounded px-3 py-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            value={passwordForm.new_password_confirmation}
+            onChange={(e) =>
+              setPasswordForm({
+                ...passwordForm,
+                new_password_confirmation: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        <button
+          onClick={() => {
+            if (passwordForm.new_password !== passwordForm.new_password_confirmation) {
+              alert("New passwords do not match!");
+              return;
+            }
+            if (passwordForm.new_password.length < 8) {
+              alert("Password must be at least 8 characters long!");
+              return;
+            }
+            saveProfile(passwordForm);
+          }}
+          className="bg-[var(--delala-green)] hover:bg-green-700 text-white font-medium rounded px-6 py-2 transition-colors"
+        >
+          Change Password
+        </button>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto p-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Profile Settings</h2>
+        {user && (
+          <div className="text-sm text-gray-600">
+            Last updated: {new Date(user.updated_at).toLocaleDateString()}
+          </div>
+        )}
+      </div>
+
+      {/* Tabs Navigation */}
+      <div className="border-b border-gray-200">
+        <div className="flex flex-wrap -mb-px overflow-x-auto">
           {profileTabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`mr-8 py-2 px-1 text-sm font-medium ${
+              className={`mr-8 py-3 px-1 text-sm font-medium whitespace-nowrap transition-colors ${
                 activeTab === tab
                   ? "border-b-2 border-[var(--delala-green)] text-[var(--delala-green)] font-semibold"
-                  : "text-gray-500 hover:text-gray-700"
+                  : "text-gray-500 hover:text-gray-700 hover:border-gray-300 border-b-2 border-transparent"
               }`}
             >
               {tab}
@@ -590,15 +528,11 @@ const renderBusinessDetails = () => (
       </div>
 
       {/* Tab Content */}
-      <div>
-        {activeTab === "Personal Details" && renderPersonalDetails?.()}
-        {activeTab === "Business Details" && renderBusinessDetails?.()}
-        {activeTab === "Phone Numbers" && renderPhoneNumbers?.()}
-        {activeTab === "Change Email" && renderChangeEmail?.()}
-        {activeTab === "Disable Chats" && renderDisableChats?.()}
-        {activeTab === "Disable Feedback" && renderDisableFeedback?.()}
-        {activeTab === "Notifications" && renderNotifications?.()}
-        {activeTab === "Change Password" && renderChangePassword?.()}
+      <div className="mt-6">
+        {activeTab === "Personal Details" && renderPersonalDetails()}
+        {activeTab === "Business Details" && renderBusinessDetails()}
+        {activeTab === "Contact Information" && renderContactInformation()}
+        {activeTab === "Change Password" && renderChangePassword()}
       </div>
     </div>
   );
