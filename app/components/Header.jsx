@@ -25,8 +25,8 @@ export default function Header() {
   // Mock user for now (set to false to test logged-out state)
   const mockUser = true;
   const router = useRouter();
-  const user = mockUser ? { name: "Ahmed" } : authUser;
-    console.log("the user is", mockUser, user, authUser)
+  const user = authUser;
+    // console.log("the user is", mockUser, user, authUser)
     function MenuItem({ icon, text, onClick, className = "", as: Component = "button", href }) {
   return (
     <Component
