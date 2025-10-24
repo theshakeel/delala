@@ -1,12 +1,13 @@
 // app/[category]/[product]/page.js
 export const revalidate = 0;
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 import AdDetails from './AdDetails';
 // console.log("process.env.NEXT_PUBLIC_API_BASE_URL =", process.env.NEXT_PUBLIC_API_BASE_URL);
 // const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
 async function getAd(categorySlug, productSlug) {
-  console.log("Fetching from:", `http://127.0.0.1:8000/get-product/${categorySlug}/${productSlug}`);
+  console.log("Fetching from:", `${API_BASE}/get-product/${categorySlug}/${productSlug}`);
 
-  const res = await fetch(`http://127.0.0.1:8000/get-product/${categorySlug}/${productSlug}`);
+  const res = await fetch(`${API_BASE}/get-product/${categorySlug}/${productSlug}`);
   console.log(res)
   if (!res.ok) throw new Error('Failed to fetch ad');
   const data = await res.json();

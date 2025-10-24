@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useState } from "react";
 import Regions from "./Regions";
@@ -42,23 +43,33 @@ export default function HomeClient({ regions = [], categories = [], ads = [] }) 
 
           <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
             {ads.map((ad, idx) => (
-              <article key={idx} className="masonry-card bg-white rounded-lg p-3 shadow-sm">
-                <div className="overflow-hidden rounded-md">
-                  <img
-                    className="img-cover w-full"
-                    src="https://placehold.co/400x300"
-                    // src={ad.images?.[0] || "/placeholder.jpg"}
-                    
-                    alt={ad.title}
-                  />
-                </div>
-                <div className="mt-3">
-                  <div className="text-sm font-bold text-[var(--delala-green)]">RTB {ad.price}</div>
-                  <div className="text-sm font-medium mt-1">{ad.title}</div>
-                  <div className="text-xs text-gray-500 mt-2">{ad.location}</div>
-                </div>
-              </article>
-            ))}
+  <Link
+    key={idx}
+    href={`/${ad.category_slug}/${ad.slug}`}
+    className="block group"
+  >
+    <article className="masonry-card bg-white rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <div className="overflow-hidden rounded-md">
+        <img
+          className="img-cover w-full group-hover:scale-[1.03] transition-transform duration-300"
+          src="https://placehold.co/400x300"
+          // src={ad.images?.[0] || "/placeholder.jpg"}
+          alt={ad.title}
+        />
+      </div>
+      <div className="mt-3">
+        <div className="text-sm font-bold text-[var(--delala-green)]">
+          RTB {ad.price}
+        </div>
+        <div className="text-sm font-medium mt-1 line-clamp-1">
+          {ad.title}
+        </div>
+        <div className="text-xs text-gray-500 mt-2">{ad.location}</div>
+      </div>
+    </article>
+  </Link>
+))}
+
           </div>
         </section>
       </section>

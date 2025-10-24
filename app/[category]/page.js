@@ -1,5 +1,5 @@
 "use client";
-
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -73,7 +73,7 @@ export default function CategoryPage({ params, searchParams }) {
       const query = new URLSearchParams(searchParams).toString();
       
       try {
-        const res = await fetch(`http://127.0.0.1:8000/get-category/${categorySlug}?${query}`);
+        const res = await fetch(`${API_BASE}/get-category/${categorySlug}?${query}`);
         if (!res.ok) throw new Error("Failed to fetch data");
         
         const data = await res.json();
