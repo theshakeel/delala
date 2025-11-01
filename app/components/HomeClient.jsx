@@ -72,7 +72,7 @@ export default function HomeClient({ regions = [], categories = [], ads = [] }) 
            
 
             <Link
-              href="/ads/search"
+              href="/all-categories"
               className="inline-flex items-center px-6 py-3 rounded-full border border-white/40 text-white font-medium hover:bg-white/10 transition-all duration-200"
             >
               Browse Listings

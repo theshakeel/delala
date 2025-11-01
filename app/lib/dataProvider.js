@@ -16,7 +16,7 @@ export async function loadHomeData() {
       throw new Error("API returned null or invalid response");
     }
 
-    return { regions, categories, categoriesAll, ads };
+    return { regions, categories, categoriesAll, ads, adsAll };
   } catch (err) {
     console.error("❌ Failed to load home data from API:", err.message);
     throw err;

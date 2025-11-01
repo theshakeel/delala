@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 
-export default function Header({ regions = [], categories = [] }) {
+export default function Header({ regions = [], categories = [], ads = [] }) {
   const { user: authUser, logout, openModal } = useAuth();
   const router = useRouter();
 
@@ -45,7 +45,7 @@ export default function Header({ regions = [], categories = [] }) {
 
   // close dropdowns on escape
   useEffect(() => {
-    const onKey = () => {
+    const onKey = (e) => {
       if (e.key === "Escape") {
         setMenuOpen(false);
         setMobileMenuOpen(false);
@@ -55,7 +55,7 @@ export default function Header({ regions = [], categories = [] }) {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-
+console.log(ads, categories, regions )
   // click outside to close
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -68,18 +68,28 @@ export default function Header({ regions = [], categories = [] }) {
   }, []);
 
   // dummy suggestions for now
-  useEffect(() => {
-    if (!search.trim()) {
-      setSuggestions([]);
-      return;
-    }
-    const dummy = [
-      { id: "1", title: "Sample Ad 1", link: "/sample1" },
-      { id: "2", title: "Sample Ad 2", link: "/sample2" },
-      { id: "3", title: "Sample Ad 3", link: "/sample3" },
-    ];
-    setSuggestions(dummy);
-  }, [search]);
+ useEffect(() => {
+  if (!search.trim()) {
+    setSuggestions([]);
+    return;
+  }
+
+  const filtered = ads
+    .filter(ad =>
+      ad.title?.toLowerCase().includes(search.toLowerCase()) ||
+      ad.description?.toLowerCase().includes(search.toLowerCase())
+    )
+    .slice(0, 5) // limit to 5 suggestions
+    .map(ad => ({
+      id: ad.id,
+      title: ad.title || "No Title",
+      slug: ad.slug,
+      categorySlug: ad.category_slug,
+    }));
+
+  setSuggestions(filtered);
+}, [search, ads]);
+
 
   const submitSearch = (e) => {
     e?.preventDefault();
@@ -146,83 +156,51 @@ export default function Header({ regions = [], categories = [] }) {
 
       {/* Center: Search & Filters */}
       <form onSubmit={submitSearch} className="flex-1 hidden md:flex flex-col relative">
-        <div className="flex items-center gap-2 w-full max-w-3xl">
-          <input
-            ref={searchRef}
-            type="text"
-            placeholder="Search, Whatever you need..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 rounded-full border border-gray-300 px-4 py-2 outline-none focus:border-[var(--delala-green)] transition"
-          />
-          <button type="submit" className="bg-[var(--delala-green)] text-white p-2 rounded-full hover:bg-green-600 transition">
-            <SearchIcon className="w-5 h-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilterOpen(!filterOpen)}
-            className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition"
-          >
-            <FilterIcon className="w-5 h-5" />
-          </button>
-        </div>
+  <div className="flex items-center gap-2 w-full max-w-3xl">
+    <input
+      ref={searchRef}
+      type="text"
+      placeholder="Search, Whatever you need..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="flex-1 rounded-full border border-gray-300 px-4 py-2 outline-none focus:border-[var(--delala-green)] transition"
+    />
+    <button type="submit" className="bg-[var(--delala-green)] text-white p-2 rounded-full hover:bg-green-600 transition">
+      <SearchIcon className="w-5 h-5" />
+    </button>
+    <button
+      type="button"
+      onClick={() => setFilterOpen(!filterOpen)}
+      className="bg-gray-100 p-2 rounded-full hover:bg-gray-200 transition"
+    >
+      <FilterIcon className="w-5 h-5" />
+    </button>
+  </div>
 
-        {/* Filter Panel */}
-        {filterOpen && (
-          <div ref={filterRef} className="absolute top-full mt-2 w-full bg-white shadow-lg rounded-lg p-4 z-50">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Region</label>
-                <select
-                  className="mt-1 block w-full border rounded p-2"
-                  value={selectedRegion?.slug || ""}
-                  onChange={(e) => {
-                    const region = regions.find(r => r.slug === e.target.value);
-                    setSelectedRegion(region || null);
-                    setSelectedZone(null);
-                  }}
-                >
-                  <option value="">All Regions</option>
-                  {regions.map(r => <option key={r.slug} value={r.slug}>{r.region}</option>)}
-                </select>
-              </div>
-              {selectedRegion?.zones?.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Zone</label>
-                  <select
-                    className="mt-1 block w-full border rounded p-2"
-                    value={selectedZone?.slug || ""}
-                    onChange={(e) => {
-                      const zone = selectedRegion.zones.find(z => z.slug === e.target.value);
-                      setSelectedZone(zone || null);
-                    }}
-                  >
-                    <option value="">All Zones</option>
-                    {selectedRegion.zones.map(z => <option key={z.slug} value={z.slug}>{z.zone}</option>)}
-                  </select>
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Category</label>
-                <select
-                  className="mt-1 block w-full border rounded p-2"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                >
-                  <option>All Categories</option>
-                  {categories.map(c => <option key={c.slug}>{c.categoryName}</option>)}
-                </select>
-              </div>
-            </div>
-            <button
-              className="mt-3 w-full bg-[var(--delala-green)] text-white py-2 rounded hover:bg-green-600 transition"
-              onClick={() => { submitSearch(); setFilterOpen(false); }}
-            >
-              Apply Filters
-            </button>
-          </div>
-        )}
-      </form>
+  {/* 🔎 Suggestions List */}
+ {suggestions.length > 0 && (
+  <ul className="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+    {suggestions.map(suggestion => (
+      <li key={suggestion.id}>
+        <Link
+          href={`/${suggestion.categorySlug}/${suggestion.slug}`}
+          className="block px-4 py-2 hover:bg-gray-100"
+          onClick={() => {
+            setSearch("");          // clear the search input
+            setSuggestions([]);    // hide suggestions
+          }}
+        >
+          {suggestion.title}
+        </Link>
+      </li>
+    ))}
+  </ul>
+)}
+
+
+  {/*...existing code...*/}
+</form>
+
 
       {/* Right: Actions */}
       <div className="flex items-center gap-3">
@@ -321,7 +299,7 @@ export default function Header({ regions = [], categories = [] }) {
             onChange={(e) => setSelectedCategory(e.target.value)}
           >
             <option>All Categories</option>
-            {categories.map(c => <option key={c.slug}>{c.categoryName}</option>)}
+            {categories.map(c => <option key={c.slug}>{c.categoryName}({c.total})</option>)}
           </select>
           <select
             className="w-full border rounded p-2"
@@ -333,7 +311,7 @@ export default function Header({ regions = [], categories = [] }) {
             }}
           >
             <option value="">All Regions</option>
-            {regions.map(r => <option key={r.slug} value={r.slug}>{r.region}</option>)}
+            {regions.map(r => <option key={r.slug} value={r.slug}>{r.region} ({r.value})</option>)}
           </select>
           {selectedRegion?.zones?.length > 0 && (
             <select

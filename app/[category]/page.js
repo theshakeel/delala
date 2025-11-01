@@ -66,28 +66,32 @@ export default function CategoryPage({ params, searchParams }) {
 
   // Fetch data
   useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
-      
-      const query = new URLSearchParams(searchParams).toString();
-      
-      try {
-        const res = await fetch(`${API_BASE}/get-category/${categorySlug}?${query}`);
-        if (!res.ok) throw new Error("Failed to fetch data");
-        
-        const data = await res.json();
-        setCategoryData(data);
-        setAds(data.ads || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
+  async function fetchData() {
+    setLoading(true);
+    setError(null);
 
-    fetchData();
-  }, [categorySlug, searchParams]);
+    const query = new URLSearchParams(searchParams).toString();
+
+    // Replace "all-categories" with the actual category slug for API
+    const apiSlug = categorySlug === "all-categories" ? "vehicles" : categorySlug;
+
+    try {
+      const res = await fetch(`${API_BASE}/get-category/${apiSlug}?${query}`);
+      if (!res.ok) throw new Error("Failed to fetch data");
+
+      const data = await res.json();
+      setCategoryData(data);
+      setAds(data.ads || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  fetchData();
+}, [categorySlug, searchParams]);
+
 
   // Handle filter save
   const handleSave = () => {
@@ -534,13 +538,13 @@ const handleFilterChange = (filterName, value, extra = null) => {
                   : 'grid-cols-1'
               }`}>
             {ads.slice(0, 15).map((ad, idx) => (
-  <SingleAd
-    key={ad.id || idx}
-    ad={ad}
-    idx={idx}
-    onClick={() => console.log("Clicked:", ad.title)}
-  />
-))}
+              <SingleAd
+                key={ad.id || idx}
+                ad={ad}
+                idx={idx}
+                onClick={() => console.log("Clicked:", ad.title)}
+              />
+            ))}
 
               </div>
             )}
