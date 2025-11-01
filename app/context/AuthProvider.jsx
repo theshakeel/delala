@@ -15,19 +15,31 @@ useEffect(() => {
   const loadUser = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
-      if (!token) return; // not logged in
 
+      const token = localStorage.getItem("token");
+      const localUser = localStorage.getItem("activeUser");
+      if (localUser) {
+        try {
+          setUser(JSON.parse(localUser));
+        } catch {
+          setUser(localUser);
+        }
+      }
+
+      if (!token) return;
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) throw new Error("Token invalid");
+      if (!res.ok) throw new Error("Token invalid or user not found");
       const json = await res.json();
-      setUser(json); // Laravel returns the authenticated user
+      setUser(json);
+      localStorage.setItem("activeUser", JSON.stringify(json));
+
     } catch (err) {
       console.error("Failed to load user:", err);
       localStorage.removeItem("token");
+      localStorage.removeItem("activeUser");
       setUser(null);
     } finally {
       setLoading(false);
@@ -52,29 +64,22 @@ const login = async ({ email, password }) => {
 );
 
 const json = await res.json();
-
+console.log("response received from login", json)
 if (res.ok && json.access_token) {
   localStorage.setItem("token", json.access_token);
+  localStorage.setItem("activeUser", json.user);
   setUser(json.user);
   setModalOpen(false);
 } else {
   alert(json.message || "Login failed");
 }
 
-
-    // if (res?.success && res?.data) {
-    //   setUser(res.data);
-    // } else {
-    //   alert(res?.message || "Login failed");
-    // }
   } finally {
     setLoading(false);
   }
 };
 
 
-  // 🧱 Register (mock for now)
- // 🧱 Register user with Laravel API (JWT)
 const register = async (data) => {
   setLoading(true);
   try {
@@ -116,7 +121,8 @@ const register = async (data) => {
   // 🧱 Logout
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
+    localStorage.removeItem("activeUser");
+    localStorage.removeItem("token");
   };
 
   const openModal = (mode = "login") => {

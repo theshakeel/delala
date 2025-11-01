@@ -3,7 +3,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
+import  SingleAd from '../components/SingleAd'
 import { 
   Filter, 
   Search, 
@@ -533,9 +533,15 @@ const handleFilterChange = (filterName, value, extra = null) => {
                   ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
                   : 'grid-cols-1'
               }`}>
-                {ads.map(ad => (
-                  <AdCard key={ad.id} ad={ad} categorySlug={categorySlug}  isListView={viewMode === 'list'} />
-                ))}
+            {ads.slice(0, 15).map((ad, idx) => (
+  <SingleAd
+    key={ad.id || idx}
+    ad={ad}
+    idx={idx}
+    onClick={() => console.log("Clicked:", ad.title)}
+  />
+))}
+
               </div>
             )}
           </main>
